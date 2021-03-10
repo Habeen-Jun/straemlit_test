@@ -5,6 +5,8 @@ from keras.models import Sequential
 from keras.layers import LSTM, Dropout, Dense, Activation
 from keras.callbacks import TensorBoard, ModelCheckpoint, ReduceLROnPlateau
 import datetime
+from datetime import datetime, timedelta
+
 def normalize_windows(data):
     normalized_data = []
     for window in data:
@@ -47,7 +49,7 @@ def pre_processing(df):
     y_test = result[row:, -1]
     
 
-    return x_test, x_train, y_test, y_train, standard_value
+    return x_test, x_train, y_test, y_train, standard_value, df
  
 
 def build_model(days=50):
@@ -69,7 +71,7 @@ def build_model(days=50):
 
 def train_model(model, x_test, x_train, y_test, y_train):
     print('모델 학습 중')
-    start_time = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+    start_time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
 
     model.fit(x_train, y_train,
         validation_data=(x_test, y_test),
@@ -83,6 +85,24 @@ def train_model(model, x_test, x_train, y_test, y_train):
 
     return model 
 
+def get_start_pred_date(data):
+    from datetime import datetime
+    dates = data['Date']  
+    try:
+        x=[datetime.strptime(date,"%d.%b.%y").date() for date in dates]
+    except:
+        x=[datetime.strptime(date,"%Y-%m-%d").date() for date in dates]
+    start_date = x[-1] + timedelta(days=1)
+    return start_date 
+
+def generate_dates(start_date, days=30):
+    date_list = []
+    for day in range(0, days):
+        date_list.append(start_date)
+        start_date += timedelta(days=1)
+    return date_list
+
+
 # pred = model.predict(x_test)
 
 # fig = plt.figure(facecolor='white', figsize=(20, 10))
@@ -94,17 +114,29 @@ def train_model(model, x_test, x_train, y_test, y_train):
 
 
 def main(df):
-    x_test, x_train, y_test, y_train, standard_value = pre_processing(df)
+    x_test, x_train, y_test, y_train, standard_value, df = pre_processing(df)
     model = build_model()
     model = train_model(model, x_test, x_train, y_test, y_train)
     pred = model.predict(x_test)
     final_price = (pred + 1) * float(standard_value)
     true_price = (y_test + 1) * float(standard_value)
 
-    data =pd.DataFrame(
-        [[i[0][0],i[1]] for i in zip(final_price, true_price)],
-        columns=['pred','actual']
-    )
+    # data =pd.DataFrame(
+    #     [[i[0][0],i[1]] for i in zip(final_price, true_price)],
+    #     columns=['pred','actual']
+    # )
+    start_date = get_start_pred_date(df)
+    date_list = generate_dates(start_date, days=len(final_price))
+
+    data = pd.DataFrame({
+        'date': date_list,
+        'pred': np.squeeze(final_price),
+    },)
+
+    data = data.set_index('date')
+ 
+
+
 
 
     return data
