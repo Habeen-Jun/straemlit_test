@@ -9,7 +9,7 @@ import datetime
 import streamlit as st 
 from ml import main 
 import altair as alt
-from bokeh.plotting import figure
+
 st.set_option('deprecation.showfileUploaderEncoding', False)
 
 st.markdown("# 이더리움 주식 분석기")
