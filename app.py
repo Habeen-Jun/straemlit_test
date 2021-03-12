@@ -9,6 +9,9 @@ import datetime
 import streamlit as st 
 from ml import main 
 import altair as alt
+from fbprophet import Prophet
+from fbprophet.plot import plot_plotly
+
 
 st.set_option('deprecation.showfileUploaderEncoding', False)
 
@@ -34,12 +37,40 @@ except Exception as e:
     print(e)
     st.write("파일을 업로드 해 주세요")
 
+
+def do_lstm():
+    data = main(df)
+    st.line_chart(data)
+    st.success("시세 예측 완료!")
+    st.balloons()
+
+def do_prophet():
+    n_days = 7
+    # Predict forecast with Prophet.
+    df_train = df[['Date','Close']]
+    df_train = df_train.rename(columns={"Date": "ds", "Close": "y"})
+    m = Prophet()
+    m.fit(df_train)
+    future = m.make_future_dataframe(periods=n_days)
+    forecast = m.predict(future)
+    # Show and plot forecast
+    st.subheader('Forecast data')
+    st.write(forecast.tail())
+        
+    st.write(f'시세 예측 그래프: {n_days} 일')
+    fig1 = plot_plotly(m, forecast)
+    st.plotly_chart(fig1)
+
+    st.write("Forecast components")
+    fig2 = m.plot_components(forecast)
+    st.write(fig2)
+    st.success("시세 예측 완료!")
+    st.balloons()
+
+
 with st.spinner("파일을 분석 중입니다... 잠시만 기다려주세요.."):
     try:
-        data = main(df)
-        st.line_chart(data)
-        st.success("시세 예측 완료!")
-        st.balloons()
+        do_prophet()
     except:
         pass
 #print(data)
