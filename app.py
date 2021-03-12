@@ -32,6 +32,7 @@ if uploaded_file is not None:
         df = pd.read_excel(uploaded_file)
 
 try:
+    st.subheader('분석할 데이터')
     st.write(df)
 except Exception as e:
     print(e)
@@ -61,9 +62,9 @@ def do_prophet():
     fig1 = plot_plotly(m, forecast)
     st.plotly_chart(fig1)
 
-    st.write("Forecast components")
-    fig2 = m.plot_components(forecast)
-    st.write(fig2)
+    # st.write("Forecast components")
+    # fig2 = m.plot_components(forecast)
+    # st.write(fig2)
     st.success("시세 예측 완료!")
     st.balloons()
 
