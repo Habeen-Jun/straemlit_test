@@ -6,3 +6,4 @@ tensorflow-cpu
 matplotlib
 datetime
 fbprophet
+pystan

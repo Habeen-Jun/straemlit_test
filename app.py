@@ -59,9 +59,11 @@ def do_prophet():
     st.write(forecast.tail())
         
     st.subheader(f'시세 예측 그래프: {n_days} 일')
+    test = m.plot(forecast)
+    st.write(test)
     fig1 = plot_plotly(m, forecast)
     st.write('그렸어야해..')
-    
+    # st.plotly_chart(forecast)
     st.plotly_chart(fig1)
 
     # st.write("Forecast components")
