@@ -7,3 +7,4 @@ matplotlib
 datetime
 fbprophet
 pystan
+plotly
